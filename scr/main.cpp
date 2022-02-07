@@ -5,29 +5,34 @@
 int buttonPin    = 0;    // momentary push button on pin 0
 int oldButtonVal = 0;
 
-#define PEAK_FALL 4     // Rate of peak falling dot
-#define PEAK_FALL1 4    // Rate of peak falling dot
-#define PEAK_FALL2 0    // Rate of peak falling dot
-#define SAMPLES   100   // Length of buffer for dynamic level adjustment  
+#define PEAK_FALL  4     // Rate of peak falling dot
+#define PEAK_FALL1 4     // Rate of peak falling dot
+#define PEAK_FALL2 0     // Rate of peak falling dot
+#define SAMPLES    100   // Length of buffer for dynamic level adjustment  
+
 #define COLOR_ORDER RGB
 #define COLOR_ORDER2 BGR
 #define LED_TYPE WS2812B
-#define NUM_LEDS 30
-#define LEFT_OUT 6
-#define RIGHT_OUT 5
-#define BRIGHTNESS 200
+
+#define NUM_LEDS    30
+#define LEFT_OUT    6
+#define RIGHT_OUT   5
+#define BRIGHTNESS  200
 #define COLOR_START 0
-#define COLOR_START2 179
-#define COLOR_START3 255
-#define COLOR_FROM 0
-#define COLOR_TO 255
+
+#define COLOR_START2  179
+#define COLOR_START3  255
+#define COLOR_FROM    0
+#define COLOR_TO      255
+
 #define GRAVITY   -9.81               // Downward (negative) acceleration of gravity in m/s^2
 #define h0        1                   // Starting height, in meters, of the ball (strip length)
 #define NUM_BALLS 4                   // Number of bouncing balls you want (recommend < 7, but 20 is fun in its own way)
-#define SPEED .20                     // Amount to increment RGB color by each cycle
-#define BG 0
-#define SPARKING 50
-#define COOLING  55
+#define SPEED     .20                     // Amount to increment RGB color by each cycle
+#define BG        0
+#define SPARKING  50
+#define COOLING   55
+
 #define FRAMES_PER_SECOND 60
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
@@ -80,19 +85,20 @@ long  tLast[NUM_BALLS]   = {};                         // The clock time of the 
 float COR[NUM_BALLS]     = {};                         // Coefficient of Restitution (bounce damping)
 
 //Ripple variables
-int color;
-int center = 0;
-int step = -1;
-int maxSteps = 16;
+
+int color      = 0;
+int center     = 0;
+int step       = -1;
+int maxSteps   = 16;
 float fadeRate = 0.80;
-int diff;
+int diff       = 0;
  
 //background color
 uint32_t currentBg = random(256);
-uint32_t nextBg = currentBg;
-int          myhue =   0;
+uint32_t nextBg    = currentBg;
+int          myhue = 0;
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, LEFT_OUT, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip  = Adafruit_NeoPixel(NUM_LEDS, LEFT_OUT, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel strip1 = Adafruit_NeoPixel(NUM_LEDS, LEFT_OUT, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel strip2 = Adafruit_NeoPixel(NUM_LEDS, RIGHT_OUT, NEO_GRB + NEO_KHZ800);
 
@@ -102,53 +108,59 @@ WaterTorture water_torture1 = WaterTorture(&strip1);
 WaterTorture water_torture2 = WaterTorture(&strip2);
 
 // Modes
+
 enum 
 {
 } MODE;
-bool reverse = true;
+
+bool reverse       = true;
 int BRIGHTNESS_MAX = 80;
-int brightness = 20;
+int brightness     = 20;
 
 // cycle variables
+
 int CYCLE_MIN_MILLIS = 2;
 int CYCLE_MAX_MILLIS = 1000;
-int cycleMillis = 20;
-bool paused = false;
-long lastTime = 0;
-bool boring = true;
+int cycleMillis      = 20;
+bool paused          = false;
+long lastTime        = 0;
+bool boring          = true;
 
 
   // Vu meter 4  
-float
-  greenOffset = 30,
-  blueOffset = 150;  
 
-int nPatterns = 17;
+float greenOffset = 30;
+float blueOffset  = 150;  
+
+int nPatterns    = 17;
 int lightPattern = 1;
 
-const int sampleWindow = 10; // Sample window width in mS (50 mS = 20Hz)
+const int sampleWindow  = 10; // Sample window width in mS (50 mS = 20Hz)
 const int sampleWindow1 = 10; // Sample window width in mS (50 mS = 20Hz)
-int maximum = 110;
-int maximum1 = 110;
-int peak; 
-int peak1;
-int dotCount;
-int dotCount1;
-unsigned int sample;
-unsigned int sample1;
+
+int maximum   = 110;
+int maximum1  = 110;
+int peak      = 0; 
+int peak1     = 0;
+int dotCount  = 0;
+int dotCount1 = 0;
+
+unsigned int sample    = 0;
+unsigned int sample1   = 0;
 bool gReverseDirection = false;
 
 CRGB leds[NUM_LEDS];
 
 void setup() 
 {
-
   // edit//
+
    FastLED.addLeds<WS2812B, LEFT_OUT, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
    FastLED.addLeds<WS2812B, RIGHT_OUT, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-//   FastLED.setBrightness(  BRIGHTNESS );
+
    LEDS.addLeds<LED_TYPE, LEFT_OUT, COLOR_ORDER>(leds, NUM_LEDS);
    LEDS.addLeds<LED_TYPE, RIGHT_OUT, COLOR_ORDER>(leds, NUM_LEDS);
+
   // edit //
   
   strip1.begin();
@@ -160,33 +172,40 @@ void setup()
 
 
   // initialize the BUTTON pin as an input
+
     pinMode(buttonPin, INPUT);
     digitalWrite(buttonPin, HIGH);  // button pin is HIGH, so it drops to 0 if pressed
  
- // setup for balls//   
+ // setup for balls
     
-    for (int i = 0 ; i < NUM_BALLS ; i++) {    // Initialize variables
-    tLast[i] = millis();
-    h[i] = h0;
-    pos[i] = 0;                              // Balls start on the ground
-    vImpact[i] = vImpact0;                   // And "pop" up at vImpact0
-    tCycle[i] = 0;
-    COR[i] = 0.90 - float(i)/pow(NUM_BALLS,2); 
+    for (int i = 0 ; i < NUM_BALLS ; i++) 
+    {    
+      // Initialize variables
+        tLast[i] = millis();
+        h[i] = h0;
+        pos[i] = 0;                              // Balls start on the ground
+        vImpact[i] = vImpact0;                   // And "pop" up at vImpact0
+        tCycle[i] = 0;
+        COR[i] = 0.90 - float(i)/pow(NUM_BALLS,2); 
     }
 
 
 }
+
 // Pattern 1 - V U METER
-    void VU() {
+void VU() 
+{
 
    //val = (analogRead(potPin) / 2);
-   unsigned long startMillis= millis();  // Start of sample window
-   unsigned int peakToPeak = 0;   // peak-to-peak level
+
+   unsigned long startMillis = millis();  // Start of sample window
+   unsigned int peakToPeak   = 0;   // peak-to-peak level
 
    unsigned int signalMax = 0;
    unsigned int signalMin = 100;
 
    // collect data for 50 mS
+
    while (millis() - startMillis < sampleWindow)
    {
       sample = analogRead(A4);
@@ -202,18 +221,19 @@ void setup()
          }
       }
    }
+   
    peakToPeak = signalMax - signalMin;  // max - min = peak-peak amplitude
 
    int led = map(peakToPeak, 0, maximum, 0, strip1.numPixels()) -1;
    
-   for(int i; i <= led; i++)
+   for (int i = 0; i <= led; i++)
    {
      int color = map(i, COLOR_START, strip1.numPixels(), COLOR_FROM, COLOR_TO);
      strip1.setPixelColor(i, Wheel(color)); 
      
    }
    
-   for(int i = strip1.numPixels() ; i > led; i--)
+   for (int i = strip1.numPixels() ; i > led; i--)
    {
      strip1.setPixelColor(i, 0); 
      
@@ -228,11 +248,14 @@ void setup()
    
 // Every few frames, make the peak pixel drop by 1:
 
-    if(++dotCount >= PEAK_FALL) { //fall rate 
+    if(++dotCount >= PEAK_FALL) 
+    { 
+      //fall rate 
       
       if(peak > 0) peak--;
       dotCount = 0;
     }
+
     // EDITED//
     
 {
@@ -262,7 +285,7 @@ void setup()
    
    int led = map(peakToPeak1, 0, maximum1, 0, strip2.numPixels()) -1;
    
-   for(int i; i <= led; i++)
+   for(int i = 0; i <= led; i++)
    {
      int color = map(i, COLOR_START, strip2.numPixels(), COLOR_FROM, COLOR_TO);
      strip2.setPixelColor(i, Wheel(color)); 
@@ -282,7 +305,7 @@ void setup()
 
    strip2.show();
    
-// Every few frames, make the peak pixel drop by 1:
+  // Every few frames, make the peak pixel drop by 1:
 
     if(++dotCount1 >= PEAK_FALL1) { //fall rate 
       
@@ -292,35 +315,45 @@ void setup()
 }
     }
 
-uint32_t Wheel(byte WheelPos) {
+uint32_t Wheel(byte WheelPos) 
+{
   WheelPos = 255 - WheelPos;
-  if(WheelPos < 45) {
+  if(WheelPos < 45) 
+  {
    return strip1.Color(255 - WheelPos * 3, 0, WheelPos * 3);
    return strip2.Color(255 - WheelPos * 3, 0, WheelPos * 3);  
-} else if(WheelPos < 170) {
+  }
+  else if(WheelPos < 170) 
+  {
     WheelPos -= 85;
    return strip1.Color(0, WheelPos * 3, 255 - WheelPos * 3);
    return strip2.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  } else {
+  } 
+  else 
+  {
    WheelPos -= 170;
    return strip1.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
    return strip2.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
   }
 }
 
-void colorWipe(uint32_t c, uint8_t wait) {
+void colorWipe(uint32_t c, uint8_t wait) 
+{
   for(uint16_t i=0; i<strip1.numPixels(); i++)
-  for(uint16_t i=0; i<strip2.numPixels(); i++) {
-    strip1.setPixelColor(i, c);
-    strip2.setPixelColor(i, c);
-    strip1.show();
-    strip2.show();
-    delay(wait);
-  }
+    for(uint16_t i=0; i<strip2.numPixels(); i++) 
+    {
+      strip1.setPixelColor(i, c);
+      strip2.setPixelColor(i, c);
+      strip1.show();
+      strip2.show();
+      delay(wait);
+    }
 }
 
-void colorWipe2(uint32_t c, uint8_t wait) {
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
+void colorWipe2(uint32_t c, uint8_t wait) 
+{
+  for(uint16_t i=0; i<strip.numPixels(); i++) 
+  {
       strip1.setPixelColor(i, c);
       strip2.setPixelColor(i, c);
       strip1.show();
@@ -330,16 +363,17 @@ void colorWipe2(uint32_t c, uint8_t wait) {
 }
 
 // Pattern 2 - V U METER 2
-    void VU2() {
 
- // val = (analogRead(potPin) / 2);
-   unsigned long startMillis= millis();  // Start of sample window
-   unsigned int peakToPeak = 0;   // peak-to-peak level
+void VU2() 
+{
+   unsigned long startMillis = millis();  // Start of sample window
+   unsigned int peakToPeak   = 0;         // peak-to-peak level
 
    unsigned int signalMax = 0;
    unsigned int signalMin = 100;
 
    // collect data for 50 mS
+   
    while (millis() - startMillis < sampleWindow)
    {
       sample = analogRead(A4);
