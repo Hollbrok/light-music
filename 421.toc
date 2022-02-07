@@ -1,0 +1,5 @@
+\babel@toc {russian}{}\relax 
+\contentsline {section}{\numberline {1}Мотивация проекта}{1}{section.1}%
+\contentsline {section}{\numberline {2}What's inside?}{1}{section.2}%
+\contentsline {section}{\numberline {3}Красивые картинки}{1}{section.3}%
+\contentsline {section}{\numberline {4}Литература}{1}{section.4}%
