@@ -1,10 +1,3 @@
-/*
- * water_torture.hpp
- *
- *  Created on: Feb 12, 2013
- *      Author: danny
- */
-
 #ifndef WATER_TORTURE_HPP_
 #define WATER_TORTURE_HPP_
 #include "rgb_operators.h"
@@ -29,6 +22,7 @@ namespace
   ///      while a part of the drop remains on the ground.
   /// After going through the swelling, falling and bouncing phases, the droplet automatically returns to the
   /// inactive state.
+  
   class droplet
   {
   public:

@@ -1,10 +1,3 @@
-/*
- * water_torture.hpp
- *
- *  Created on: Feb 12, 2013
- *      Author: danny
- */
-
 #ifndef WATER_TORTURE_HPP_
 #define WATER_TORTURE_HPP_
 #include "rgb_operators.h"
@@ -20,15 +13,6 @@ namespace
     return (static_cast<uint16_t>( value) * multiplier) >> 8;
   }
 
-  /// This class maintains the state and calculates the animations to render a falling water droplet
-  /// Objects of this class can have three states:
-  ///    - inactive: this object does nothing
-  ///    - swelling: the droplet is at the top of the led strip and swells in intensity
-  ///    - falling: the droplet falls downwards and accelerates
-  ///    - bouncing: the droplet has bounced of the ground. A smaller, less intensive droplet bounces up
-  ///      while a part of the drop remains on the ground.
-  /// After going through the swelling, falling and bouncing phases, the droplet automatically returns to the
-  /// inactive state.
   class droplet
   {
   public:
